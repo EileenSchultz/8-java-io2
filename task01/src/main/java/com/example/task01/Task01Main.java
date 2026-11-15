@@ -16,19 +16,21 @@ public class Task01Main {
     }
 
     public static String extractSoundName(File file) throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("C:\\Users\\User\\Downloads\\ffmpeg-master-latest-win64-gpl\\"
-                + "ffmpeg-master-latest-win64-gpl\\bin\\ffprobe.exe",
-                "-v", "error", "-show_format", "-of", "flat", file.getAbsolutePath());
-
-        Process process = processBuilder.start();
+        Process process = new ProcessBuilder(
+                "ffprobe",
+                "-v", "error",
+                "-show_format",
+                "-of", "flat",
+                file.getAbsolutePath()
+        ).start();
         String result = null;
-
+        String prefix = "format.tags.title=";
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("format.tags.title=\"")) {
-                    result = line.substring(19, line.length() - 1);
+                if (line.startsWith(prefix)) {
+                    String rawTitle = line.substring(prefix.length());
+                    result = rawTitle.replace("\"", "");
                     break;
                 }
             }
